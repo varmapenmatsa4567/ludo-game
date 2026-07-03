@@ -54,22 +54,25 @@ export function getValidMoves(state: GameState): number[] {
       continue;
     }
 
-    // Token is on the board
+    const colorInfo = BOARD_POSITIONS[player.color];
     const newPos = token.position + dice;
 
+    // Token is already on home path (52-56)
+    if (token.position >= 52 && token.position <= 56) {
+      const currentHomeSteps = token.position - 51; // pos 52 = step 1, 53 = step 2, etc.
+      const totalSteps = currentHomeSteps + dice;
+      if (totalSteps <= 6) {
+        validTokens.push(token.id);
+      }
+      continue;
+    }
+
     // Check if token can enter home path
-    const colorInfo = BOARD_POSITIONS[player.color];
     if (token.position <= colorInfo.entry && newPos > colorInfo.entry) {
       // Moving into home path
       const homeSteps = newPos - colorInfo.entry;
       if (homeSteps <= 6) {
-        if (homeSteps === 6) {
-          // Exact roll to finish!
-          validTokens.push(token.id);
-        } else if (homeSteps < 6) {
-          // Will land on home path
-          validTokens.push(token.id);
-        }
+        validTokens.push(token.id);
       }
       continue;
     }
@@ -152,6 +155,24 @@ export function moveToken(state: GameState, tokenId: number): GameState {
     token.isHome = false;
     token.position = BOARD_POSITIONS[player.color].start;
     newState.message = `${player.name} rolled a 6! Token out! 🎉`;
+  } else if (token.position >= 52 && token.position <= 56) {
+    // Token is already on home path - move further
+    const currentHomeSteps = token.position - 51; // pos 52 = step 1
+    const totalSteps = currentHomeSteps + dice;
+    if (totalSteps < 6) {
+      token.position = 51 + totalSteps;
+      newState.message = `${player.name} moved further into home path! 🏠`;
+    } else if (totalSteps === 6) {
+      token.isFinished = true;
+      token.position = 57;
+      newState.message = `${player.name} got a token home! 🏆`;
+    } else {
+      newState.message = `Can't move that token!`;
+      newState.diceRolled = false;
+      newState.canMove = false;
+      newState.diceValue = null;
+      return newState;
+    }
   } else if (!token.isHome) {
     const colorInfo = BOARD_POSITIONS[player.color];
     const newPos = token.position + dice;

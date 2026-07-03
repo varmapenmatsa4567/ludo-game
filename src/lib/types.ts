@@ -65,10 +65,10 @@ export const BOARD_POSITIONS: Record<PlayerColor, {
     entry: 24,
     homePath: [52, 53, 54, 55, 56],
     homeBase: [
-      { row: 0, col: 10 },
-      { row: 0, col: 11 },
-      { row: 1, col: 10 },
-      { row: 1, col: 11 },
+      { row: 0, col: 0 },
+      { row: 0, col: 1 },
+      { row: 1, col: 0 },
+      { row: 1, col: 1 },
     ],
   },
   blue: {
@@ -76,10 +76,10 @@ export const BOARD_POSITIONS: Record<PlayerColor, {
     entry: 37,
     homePath: [52, 53, 54, 55, 56],
     homeBase: [
-      { row: 10, col: 0 },
-      { row: 10, col: 1 },
-      { row: 11, col: 0 },
-      { row: 11, col: 1 },
+      { row: 10, col: 10 },
+      { row: 10, col: 11 },
+      { row: 11, col: 10 },
+      { row: 11, col: 11 },
     ],
   },
 };

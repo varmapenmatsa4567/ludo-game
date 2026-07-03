@@ -126,7 +126,7 @@ export default function Home() {
               <Dice
                 value={gameState.diceValue}
                 onClick={handleRollDice}
-                disabled={gameState.canMove || !gameState.gameStarted === false}
+                disabled={gameState.canMove || gameState.diceRolled}
                 rolled={gameState.diceRolled}
               />
 

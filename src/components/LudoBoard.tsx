@@ -32,7 +32,7 @@ const TOKEN_EMOJIS: Record<PlayerColor, string> = {
 };
 
 export default function LudoBoard({ gameState, onTokenClick, validMoves }: LudoBoardProps) {
-  const { players } = gameState;
+  const { players, currentPlayerIndex } = gameState;
 
   // Create a 15x15 grid
   const grid: React.ReactNode[][] = [];
@@ -105,6 +105,15 @@ export default function LudoBoard({ gameState, onTokenClick, validMoves }: LudoB
     return row >= 6 && row <= 8 && col >= 6 && col <= 8;
   }
 
+  function isHomeBaseDot(row: number, col: number): boolean {
+    for (const player of players) {
+      for (const pos of BOARD_POSITIONS[player.color].homeBase) {
+        if (pos.row === row && pos.col === col) return true;
+      }
+    }
+    return false;
+  }
+
   function getTokensAtCell(row: number, col: number): { token: Token; player: Player }[] {
     const tokens: { token: Token; player: Player }[] = [];
     for (const player of players) {
@@ -154,32 +163,41 @@ export default function LudoBoard({ gameState, onTokenClick, validMoves }: LudoB
 
     // Style for track
     if (isTrack) {
-      cellStyle.backgroundColor = "#F5F5F5";
+      cellStyle.backgroundColor = "#FAFAFA";
+      cellStyle.border = "0.5px solid #E0E0E0";
       if (isSafe) {
-        cellStyle.backgroundColor = "#FFEB3B";
-        cellStyle.border = "1px solid #FF9800";
+        cellStyle.backgroundColor = "#FFF8E1";
+        cellStyle.border = "1px solid #FFB300";
+        cellStyle.boxShadow = "inset 0 0 4px rgba(255, 179, 0, 0.3)";
       }
     }
 
-    // Center cell styling
+    // Center cell styling - the home/finish area
     if (row === 7 && col === 7) {
-      cellStyle.backgroundColor = "#2C3E50";
+      cellStyle.backgroundColor = "#1a1a2e";
     }
 
+    const currentPlayer = gameState.players[currentPlayerIndex];
     // Tokens in cell
     const tokenElements = tokens.map(({ token, player }) => {
-      const isValid = validMoves.includes(token.id);
+      const isValid = player.color === currentPlayer.color && validMoves.includes(token.id);
       return (
         <span
           key={`${player.color}-${token.id}`}
           onClick={() => isValid && onTokenClick(token.id)}
           style={{
-            fontSize: "14px",
+            fontSize: "20px",
             cursor: isValid ? "pointer" : "default",
-            filter: isValid ? "brightness(1.3) drop-shadow(0 0 3px gold)" : "none",
-            transition: "transform 0.2s",
-            transform: isValid ? "scale(1.2)" : "scale(1)",
-            padding: "1px",
+            filter: isValid
+              ? "brightness(1.4) drop-shadow(0 0 6px gold) drop-shadow(0 0 2px orange)"
+              : token.isHome
+              ? "brightness(0.7)"
+              : "none",
+            transition: "all 0.2s ease",
+            transform: isValid ? "scale(1.4)" : "scale(1)",
+            padding: "2px",
+            userSelect: "none",
+            lineHeight: 1,
           }}
           title={`${player.name} Token ${token.id + 1}${isValid ? " (click to move)" : ""}`}
         >
@@ -191,20 +209,25 @@ export default function LudoBoard({ gameState, onTokenClick, validMoves }: LudoB
     return (
       <div key={`${row}-${col}`} style={cellStyle}>
         {isCenter && row === 6 && col === 7 && (
-          <span style={{ color: "white", fontSize: "8px" }}>🏆</span>
+          <span style={{ fontSize: "12px" }}>🏆</span>
         )}
         {isCenter && row === 7 && col === 6 && (
-          <span style={{ color: "white", fontSize: "8px" }}>🎯</span>
+          <span style={{ fontSize: "12px" }}>⭐</span>
         )}
         {tokenElements.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "1px" }}>
             {tokenElements}
           </div>
         )}
-        {isTrack && !isSafe && tokenElements.length === 0 && trackIdx !== null && (
-          <span style={{ fontSize: "6px", color: "#ccc", position: "absolute", bottom: 0, right: 1 }}>
-            {trackIdx}
-          </span>
+        {/* Home base dot indicators for token starting positions */}
+        {(isHomeBaseDot(row, col)) && (
+          <div style={{
+            width: "10px",
+            height: "10px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(0,0,0,0.15)",
+            position: "absolute",
+          }} />
         )}
       </div>
     );

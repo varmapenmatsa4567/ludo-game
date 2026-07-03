@@ -97,9 +97,7 @@ export default function Dice({ value, onClick, disabled, rolled }: DiceProps) {
       </div>
       <span className="text-sm font-medium text-gray-600">
         {disabled
-          ? "Not your turn"
-          : rolled
-          ? "Click a token to move"
+          ? "Choose a token to move 👆"
           : "Click to roll! 🎲"}
       </span>
     </div>
